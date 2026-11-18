@@ -654,7 +654,27 @@ local function create()
         end
     end)
     button(window, "닫기", 420, -638, 104, function() window:Hide() end)
-    if UISpecialFrames then table.insert(UISpecialFrames, "MimQoLCooldownConfig") end
+    -- Not in UISpecialFrames: opening the spellbook closes those windows, but
+    -- spells are dragged from it. Escape is handled here instead; other keys
+    -- pass through. Keyboard propagation cannot change in combat, so Escape
+    -- then simply reaches the game as usual.
+    window:EnableKeyboard(true)
+    if window.SetPropagateKeyboardInput then window:SetPropagateKeyboardInput(true) end
+    window:SetScript("OnKeyDown", function(self, key)
+        if InCombatLockdown and InCombatLockdown() then return end
+        if not self.SetPropagateKeyboardInput then return end
+        if key == "ESCAPE" then
+            self:SetPropagateKeyboardInput(false)
+            self:Hide()
+        else
+            self:SetPropagateKeyboardInput(true)
+        end
+    end)
+    window:HookScript("OnShow", function(self)
+        if self.SetPropagateKeyboardInput and not (InCombatLockdown and InCombatLockdown()) then
+            self:SetPropagateKeyboardInput(true)
+        end
+    end)
     window:Hide()
 end
 
