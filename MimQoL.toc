@@ -1,0 +1,20 @@
+## Interface: 120100
+## Title: MimQoL
+## Notes: Lightweight tooltip, vendor, auction, quest automation, combat reminder, reward value, chat link, auto greeting, audio, loot, action bar, and destroy helpers.
+## Author: MimQoL
+## Version: 0.8.17
+## SavedVariables: MimQoLDB
+
+MimQoL.lua
+PetReminder.lua
+CooldownReminder.lua
+CooldownReminderConfig.lua
+GreetingOverlay.lua
+AutoGreet.lua
+DungeonPortal.lua
+BagItemLevel.lua
+ChatSound.lua
+AuraDecimals.lua
+ArgusTracker.lua
+MacroKeeper.lua
+ActionBarKeeper.lua

@@ -1,0 +1,8 @@
+Bell.ogg, Chime.ogg, Heart.ogg, IM.ogg, Info.ogg, Kachink.ogg, Link.ogg,
+Text1.ogg, Text2.ogg, Xylo.ogg
+
+Copied unchanged from Prat-3.0 3.9.112 (Interface\AddOns\Prat-3.0\sounds),
+Copyright (C) 2006-2018 Prat Development Team.
+Prat is distributed under the GNU General Public License v3
+(https://www.gnu.org/licenses/gpl-3.0.html). These files remain under that
+license. Source: https://www.curseforge.com/wow/addons/prat-3-0

@@ -1,0 +1,35 @@
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor / IDE
+.vscode/
+.idea/
+.vs/
+*.swp
+*.swo
+*.wowproj
+*.wowsln
+
+# 로컬 배포 스크립트
+*.bat
+
+# Claude Code
+.claude/
+
+# Backup / temp
+*.bak
+*.tmp
+*.orig
+*~
+
+# WoW 런타임 / 도구 로그
+WTF/
+Cache/
+Logs/
+
+# 배포 추천 메시지 (로컬 임시)
+.deploy-msg
+
+dist/
