@@ -358,6 +358,19 @@ GetSpecialization, GetSpecializationInfo = nil, nil
 MimQoLDB.cooldownReminderProfiles = nil
 api.ApplySettings()
 
+-- Moving/preview shows only alerts this spec can use; they take the grid slots.
+e.reset("spell:401\nspell:402")
+e.spell(402, 0)
+api.ApplySettings()
+api.SetMoving(true)
+check(not e.card(1):IsShown() and e.card(2):IsShown(), "move mode hides an unlearned spell")
+check(e.card(2).point[4] == 0 and e.card(2).point[5] == 0, "usable alert takes the first grid slot")
+api.SetMoving(false)
+e.known[402] = false; api.ApplySettings(); api.SetMoving(true)
+check(e.card(1):IsShown() and e.card(2):IsShown(), "with nothing usable every alert is shown to place")
+api.SetMoving(false)
+
+
 e.reset("")
 api.ApplySettings()
 api.TestPulse()

@@ -677,6 +677,15 @@ local function itemRemaining(id)
     return math.max(0, start + duration - GetTime())
 end
 
+-- Usable now: a spell this spec knows, or a trinket that is equipped.
+local function usable(entry)
+    if entry.kind == "spell" then return resolvedSpell(entry.id) ~= nil end
+    for slot = 13, 14 do
+        if readable(GetInventoryItemID, "player", slot) == entry.id then return true end
+    end
+    return false
+end
+
 local function update()
     if not enabled() then hideAll(); return end
     if previewUntil and GetTime() >= previewUntil then previewUntil = nil end
@@ -697,7 +706,9 @@ local function update()
     end
     for index, entry in ipairs(entries) do
         local card = cards[index]
-        if previewUntil or moving then
+        if (previewUntil or moving) and not card.usable then
+            card:Hide()
+        elseif previewUntil or moving then
             card:SetAlpha(1)
             if entry.count then card.stack:SetValue(entry.count) end
             if MimQoLDB.cooldownReminderTiming == "ready" then
@@ -812,21 +823,39 @@ applySettings = function()
         return
     end
     createAnchor()
+    -- Alerts this spec cannot use take no grid slot and stay out of the
+    -- preview/move view; if none is usable, all are shown so they can be placed.
+    local usableFlags, usableCount = {}, 0
+    for index, entry in ipairs(entries) do
+        usableFlags[index] = usable(entry)
+        if usableFlags[index] then usableCount = usableCount + 1 end
+    end
+    local showAll = usableCount == 0
+    local gridCount = showAll and #entries or usableCount
     local scale = number(MimQoLDB.cooldownReminderScale, 100, 50, 200) / 100
     local x = number(MimQoLDB.cooldownReminderX, 0, -10000, 10000)
     local y = number(MimQoLDB.cooldownReminderY, 40, -10000, 10000)
-    local columns = math.min(3, #entries)
+    local columns = math.min(3, gridCount)
     local iconSize = number(MimQoLDB.cooldownReminderIconSize, 48, 24, 96)
     local numberSize = number(MimQoLDB.cooldownReminderNumberSize, 22, 12, 48)
     local fontSize = number(MimQoLDB.cooldownReminderFontSize, 22, 12, 36)
     local rowHeight = iconSize + fontSize * 2 + 30
     anchor:ClearAllPoints()
     anchor:SetPoint("CENTER", UIParent, "CENTER", x, y)
-    anchor:SetSize(columns * 240 * scale, math.ceil(#entries / 3) * rowHeight * scale)
+    anchor:SetSize(columns * 240 * scale, math.ceil(gridCount / 3) * rowHeight * scale)
     anchor:Show()
+    local slot = 0
     for index, entry in ipairs(entries) do
         local card = cards[index] or createCard(index)
         card.entry = entry
+        card.usable = showAll or usableFlags[index]
+        local gridIndex
+        if card.usable then
+            slot = slot + 1
+            gridIndex = slot
+        else
+            gridIndex = gridCount + (index - slot)
+        end
         card:ClearAllPoints()
         card:SetScale(scale)
         local key = entry.kind .. ":" .. entry.id
@@ -834,8 +863,8 @@ applySettings = function()
         if position then
             card:SetPoint("TOP", anchor, "CENTER", position[1], position[2])
         else
-            card:SetPoint("TOPLEFT", anchor, "TOPLEFT", ((index - 1) % 3) * 240,
-                -math.floor((index - 1) / 3) * rowHeight)
+            card:SetPoint("TOPLEFT", anchor, "TOPLEFT", ((gridIndex - 1) % 3) * 240,
+                -math.floor((gridIndex - 1) / 3) * rowHeight)
         end
         local size = own.size or iconSize
         local height = size + fontSize * 2 + 30

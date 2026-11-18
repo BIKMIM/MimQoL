@@ -227,7 +227,27 @@ local function create()
     button(page, "장신구 ID 등록", 396, -100, 128, function() addID("item") end)
     idBox:SetScript("OnEnterPressed", function() addID("spell") end)
     local count = label(page, "등록 목록", 16, -138, 200, "GameFontNormal")
-    hint(page, "항목을 누르면 위치·크기·소리·스택 조건을 따로 정합니다.", 200, -140, 324)
+    local listHint = hint(page, "항목을 누르면 위치·크기·소리·스택 조건을 따로 정합니다.", 160, -140, 364)
+    -- Removes spells this spec has not learned; the second click confirms.
+    local cleanup
+    cleanup = button(page, "", 314, -134, 210, function()
+        if not cleanup.armed then
+            cleanup.armed = true
+            cleanup:SetText("한 번 더 누르면 삭제")
+            return
+        end
+        cleanup.armed = nil
+        local removed = 0
+        for _, entry in ipairs(Reminder.GetEntries()) do
+            local _, active = Reminder.Status(entry)
+            if entry.kind == "spell" and not active then
+                Reminder.Remove(entry.kind, entry.id)
+                removed = removed + 1
+            end
+        end
+        status:SetText("이 전문화에서 배우지 않은 스킬 " .. removed .. "개를 목록에서 지웠습니다.")
+        window.Refresh()
+    end)
     local scroll = CreateFrame("ScrollFrame", nil, page, "UIPanelScrollFrameTemplate")
     scroll:SetPoint("TOPLEFT", 16, -158)
     scroll:SetSize(484, 252)
@@ -557,8 +577,8 @@ local function create()
         local listEntries = Reminder.GetEntries()
         local spec = Reminder.GetSpecName and Reminder.GetSpecName()
         specText:SetText(spec and ("현재 전문화: |cffffd100" .. spec .. "|r") or "전문화 확인 중…")
-        scopeHint:SetText((spec and ("'" .. spec .. "' 전용 목록입니다. ") or "")
-            .. "전문화를 바꾸면 그 전문화의 목록이 따로 보입니다. 같은 직업 캐릭터끼리는 공유합니다.")
+        scopeHint:SetText((spec and ("'" .. spec .. "' 전용 목록 · ") or "")
+            .. "전문화마다 따로 저장, 같은 직업 캐릭터끼리 공유")
         count:SetText("등록 목록 (" .. #listEntries .. "/12)")
         empty:SetShown(#listEntries == 0)
         for _, row in ipairs(listRows) do row:Hide() end
@@ -585,6 +605,14 @@ local function create()
             row:Show()
         end
         list:SetHeight(math.max(42, #listEntries * 42))
+        local unlearned = 0
+        for _, entry in ipairs(listEntries) do
+            local _, active = Reminder.Status(entry)
+            if entry.kind == "spell" and not active then unlearned = unlearned + 1 end
+        end
+        cleanup:SetShown(unlearned > 0)
+        listHint:SetShown(unlearned == 0)
+        if not cleanup.armed then cleanup:SetText("배우지 않은 스킬 " .. unlearned .. "개 지우기") end
         if panel and panel:IsShown() then
             -- Entries are rebuilt on save, so follow the fresh copy (its count may have changed).
             if current then panel.entry = current; panel.Refresh() else panel:Hide() end
@@ -642,7 +670,10 @@ local function create()
         end
         window.Refresh()
     end)
-    window:SetScript("OnShow", window.Refresh)
+    window:SetScript("OnShow", function()
+        cleanup.armed = nil
+        window.Refresh()
+    end)
     window:SetScript("OnHide", function()
         commitSound()
         soundBox:ClearFocus()
