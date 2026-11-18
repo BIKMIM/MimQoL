@@ -1,7 +1,7 @@
 -- Personal cooldown warnings. Restricted spell times go straight from duration
 -- curves to the UI; never compare them or use visibility to trigger Lua actions.
 local driver = CreateFrame("Frame")
-local MAX_ENTRIES = 12
+local MAX_ENTRIES = 200
 local INTERVAL = 0.1
 local cards, entries = {}, {}
 local elapsed, previewUntil = 0, nil
@@ -265,7 +265,7 @@ local function add(kind, value)
     for _, entry in ipairs(list) do
         if entry.kind == kind and entry.id == id then return false, "이미 등록되어 있습니다." end
     end
-    if #list >= MAX_ENTRIES then return false, "최대 12개까지 등록할 수 있습니다." end
+    if #list >= MAX_ENTRIES then return false, "최대 " .. MAX_ENTRIES .. "개까지 등록할 수 있습니다." end
     list[#list + 1] = { kind = kind, id = id }
     saveEntries(list)
     if kind == "item" and C_Item and type(C_Item.RequestLoadItemDataByID) == "function" then
@@ -996,6 +996,7 @@ _G.MimQoLCooldownReminder = {
         return specName
     end,
     Status = entryStatus,
+    MaxEntries = MAX_ENTRIES,
     Describe = describe,
     Presets = presets,
     TestSound = playSound,

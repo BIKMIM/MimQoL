@@ -24,8 +24,8 @@ e.cursor = { "macro", 4 }
 check(not api.AddFromCursor() and e.cleared == 2, "unsupported drop preserves cursor")
 api.Remove("spell", 102)
 check(#api.GetEntries() == 2 and api.GetEntries()[2].id == 201, "removal preserves other entries")
-for id = 301, 310 do check(api.Add("spell", id), "entry capacity") end
-check(not api.Add("spell", 311) and #api.GetEntries() == 12, "twelve entry limit")
+for id = 301, 498 do check(api.Add("spell", id), "entry capacity") end
+check(not api.Add("spell", 499) and #api.GetEntries() == 200, "200 entry limit")
 MimQoLDB.cooldownReminderEntries = "spell:101\nspell:00101\nspell:0\nbad\nitem:201"
 check(#api.GetEntries() == 2, "saved entries normalized and sanitized")
 

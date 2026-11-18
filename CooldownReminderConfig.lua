@@ -579,7 +579,7 @@ local function create()
         specText:SetText(spec and ("현재 전문화: |cffffd100" .. spec .. "|r") or "전문화 확인 중…")
         scopeHint:SetText((spec and ("'" .. spec .. "' 전용 목록 · ") or "")
             .. "전문화마다 따로 저장, 같은 직업 캐릭터끼리 공유")
-        count:SetText("등록 목록 (" .. #listEntries .. "/12)")
+        count:SetText("등록 목록 (" .. #listEntries .. "/" .. (Reminder.MaxEntries or 200) .. ")")
         empty:SetShown(#listEntries == 0)
         for _, row in ipairs(listRows) do row:Hide() end
         local current
